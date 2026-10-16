@@ -1,4 +1,4 @@
 @echo off
-rem ダブルクリックで llama-server を起動し、チャット画面をブラウザで開く
+rem Double-click: start llama-server and open the chat page in the browser
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0launch-llm.ps1"
 if errorlevel 1 pause
