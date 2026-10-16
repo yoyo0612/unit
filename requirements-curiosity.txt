@@ -1,9 +1,8 @@
 # Curiosity-driven Learning 用の依存関係
 # 事前に venv を作成し、下記のコマンドで PyTorch（CUDA 版）を先に入れてから本ファイルを入れる:
-#   py -3.12 -m venv .venv
-#   .venv\Scripts\activate
-#   pip install torch --index-url https://download.pytorch.org/whl/cu128
-#   pip install -r requirements-curiosity.txt
+#   uv venv --python 3.12 .venv
+#   uv pip install --python .venv torch --index-url https://download.pytorch.org/whl/cu128
+#   uv pip install --python .venv -r requirements-curiosity.txt
 
 gymnasium>=1.0
 minigrid>=2.3

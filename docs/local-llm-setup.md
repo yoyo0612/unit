@@ -1,6 +1,14 @@
-# ローカル LLM セットアップ手順（RTX 3070 Ti 8GB / RAM 128GB）
+# ローカル LLM セットアップ手順（RTX 3070 Ti 8GB / RAM 96GB）
 
-対象環境: Windows 11、NVIDIA RTX 3070 Ti（VRAM 8GB）、システム RAM 128GB
+対象環境: Windows 11、AMD Ryzen 9 5950X（16 コア / 32 スレッド）、NVIDIA RTX 3070 Ti（VRAM 8GB）、システム RAM 96GB
+
+導入済み（2026-10-16 時点）:
+- NVIDIA ドライバ 610.47（CUDA 13.3 まで対応）
+- llama.cpp b11675（CUDA 12.4 版）→ `C:\llm\bin\`
+- `hf` CLI（huggingface_hub 2.2.0、`uv tool` で導入）
+- Docker Desktop
+
+未導入: Ollama、LM Studio、GGUF モデル
 
 > 注意: 速度や対応モデルは個人の報告やベンチマークに基づく推定を含みます。
 > モデル名・フラグ・リリース版は導入時に必ず最新の公式情報で確認してください。
@@ -48,12 +56,15 @@ New-Item -ItemType Directory -Force C:\llm\bin, C:\llm\models, C:\llm\scripts
 ### 2-A. llama.cpp（CUDA ビルド版）を使う場合（推奨）
 
 1. [llama.cpp Releases](https://github.com/ggml-org/llama.cpp/releases) を開く
-2. Windows 向けの **CUDA 対応 zip**（`cuda-12.x` や `cuda-13.x` と付くもの）と、対応する **cudart** の zip を両方ダウンロードする
+2. Windows 向けの **CUDA 対応 zip** と、対応する **cudart** の zip を両方ダウンロードする
+   - この PC のドライバは CUDA 13.3 までの対応なので、`cuda-12.4-x64` 版を使う（`cuda-13.4` 版はドライバ更新が必要になる可能性がある）
+   - 例: `llama-bXXXXX-bin-win-cuda-12.4-x64.zip` と `cudart-llama-bin-win-cuda-12.4-x64.zip`
 3. 両方を `C:\llm\bin\` に展開する
 4. 動作確認
 
 ```powershell
 C:\llm\bin\llama-cli.exe --version
+C:\llm\bin\llama-server.exe --list-devices   # CUDA0: NVIDIA GeForce RTX 3070 Ti と出れば OK
 ```
 
 ### 2-B. Ollama を使う場合
@@ -100,15 +111,18 @@ $env:HF_TOKEN = "hf_xxxxxxxx"   # 公開モデルでは不要な場合が多い
 
 ### 3-3. ダウンロード
 
+この PC にはシステムの Python が無いため、`uv` でツールとして入れます（導入済み）。
+
 ```powershell
-pip install -U "huggingface_hub[cli]"
+uv tool install huggingface_hub
 hf download <リポジトリID> <ファイル名>.gguf --local-dir C:\llm\models
 ```
 
-> `hf` コマンドが使えない場合は `huggingface-cli download` を試してください（ツールのバージョンにより異なります）。
+> `hf` が見つからない場合は `uv tool update-shell` を実行してターミナルを開き直してください。
 
 ダウンロード対象のモデルは、ファイルサイズを先に確認してください。
-- VRAM 8GB に全部は載らない → CPU オフロード前提で RAM 128GB に収まるか確認
+- VRAM 8GB に全部は載らない → CPU オフロード前提で RAM 96GB に収まるか確認（OS や他アプリの分を除き、モデルは 70〜80GB 程度までが目安）
+- C ドライブの空きは約 420GB。大きいモデルを多数置く場合は D ドライブ（約 5TB 空き）に `models` を置いてもよい
 - MoE モデルは `-ncmoe` で expert を CPU 側に寄せる
 
 ---
@@ -125,7 +139,7 @@ C:\llm\bin\llama-server.exe `
   -ngl 99 `
   --n-cpu-moe 30 `
   -c 8192 `
-  -t 8 `
+  -t 16 `
   --flash-attn on `
   --port 8080
 ```
@@ -135,7 +149,7 @@ C:\llm\bin\llama-server.exe `
 | `-ngl 99` | GPU に載せる層数（多めに指定すると余った分は自動で CPU へ） | 基本は大きい値 |
 | `--n-cpu-moe N` | 先頭 N 層の MoE expert を CPU に置く | VRAM が溢れたら増やす、余裕があれば減らす |
 | `-c` | コンテキスト長 | 長いほど VRAM / RAM を使う |
-| `-t` | CPU スレッド数 | 物理コア数付近。多すぎると遅くなることがある |
+| `-t` | CPU スレッド数 | 5950X は物理 16 コア。16 から始め、12〜16 の範囲で試す（32 は遅くなりやすい） |
 | `--flash-attn on` | Flash Attention | 対応モデルでは有効にする |
 | `-ctk q8_0 -ctv q8_0` | KV キャッシュの量子化 | 長いコンテキストで VRAM を節約 |
 
@@ -175,7 +189,7 @@ GUI でモデルを読み込み、「Local Server」から起動します。
 計測は `llama-bench` を使うと便利です。
 
 ```powershell
-C:\llm\bin\llama-bench.exe -m C:\llm\models\<モデル名>.gguf -ngl 99 --n-cpu-moe 30 -t 8
+C:\llm\bin\llama-bench.exe -m C:\llm\models\<モデル名>.gguf -ngl 99 --n-cpu-moe 30 -t 16
 ```
 
 記録する項目の例:

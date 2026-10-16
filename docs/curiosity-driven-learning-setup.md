@@ -6,52 +6,53 @@
 
 ---
 
-## 1. 現状の確認結果
+## 1. 現状の確認結果（2026-10-16 時点）
 
-| 項目 | 状態 | 対処 |
-|---|---|---|
-| NVIDIA ドライバ | `nvidia-smi` が見つからない | ドライバを入れ直すか、PATH を確認。GPU 無しでも小規模実験は可能 |
-| Python | 3.14.8 のみ | PyTorch の CUDA 版は 3.14 未対応の可能性があるため **3.12 を推奨** |
+| 項目 | 状態 |
+|---|---|
+| GPU | NVIDIA GeForce RTX 3070 Ti（VRAM 8GB）、ドライバ 610.47（CUDA 13.3 まで対応） |
+| CPU / RAM | AMD Ryzen 9 5950X（16 コア / 32 スレッド）/ 96GB |
+| システムの Python | 未導入（`python` は Microsoft Store のスタブのみ、`py` ランチャーも無し） |
+| Python の管理 | `uv` 0.11.3 を使用。Python 3.12.13 は `uv python install 3.12` で導入済み |
+| venv | `C:\unit\.venv`（Python 3.12.13、PyTorch 2.11.0+cu128）構築済み |
 
-Python 3.12 の導入例:
-
-```powershell
-winget install --id Python.Python.3.12 -e
-py -0p   # 3.12 が一覧に出れば OK
-```
+> PyTorch の CUDA 版は Python 3.14 未対応の可能性があるため、3.12 を使っています。
 
 ---
 
 ## 2. 環境構築
 
+この PC では `uv` を使います（`pip` / `py` は不要）。
+
 ```powershell
-cd C:\kait\unit\unit
-py -3.12 -m venv .venv
-.venv\Scripts\activate
+cd C:\unit
+uv python install 3.12
+uv venv --python 3.12 .venv
 
-# PyTorch（CUDA 版）。GPU のドライバに合わせて cu128 / cu126 等を選ぶ
-pip install torch --index-url https://download.pytorch.org/whl/cu128
+# PyTorch（CUDA 版）。ドライバは CUDA 13.3 まで対応なので cu128 で問題ない
+uv pip install --python .venv torch --index-url https://download.pytorch.org/whl/cu128
 
-pip install -r requirements-curiosity.txt
+uv pip install --python .venv -r requirements-curiosity.txt
 ```
 
-> `.venv` は `.gitignore` の対象に入れてください（現在のリポジトリには `.gitignore` がありません）。
+> `.venv` は `.gitignore` で除外しています。
 
 ### 動作確認
 
 ```powershell
+.venv\Scripts\activate
 python scripts\check_env.py
 ```
 
-期待する出力の例:
+この PC での実際の出力:
 
 ```
-Python : 3.12.x
-PyTorch: 2.x.x+cu128
+Python : 3.12.13
+PyTorch: 2.11.0+cu128
 CUDA   : True
 GPU    : NVIDIA GeForce RTX 3070 Ti
 VRAM   : 8.0 GB
-Env    : MiniGrid-Empty-5x5-v0 OK（10 ステップ、報酬合計 ...）
+Env    : MiniGrid-Empty-5x5-v0 OK（10 ステップ、報酬合計 0.00）
 ```
 
 `CUDA : False` の場合はドライバか PyTorch の CUDA 版インストールを確認してください。

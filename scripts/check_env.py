@@ -26,13 +26,15 @@ def check_env(env_id: str = "MiniGrid-Empty-5x5-v0") -> None:
     env = gym.make(env_id)
     obs, _ = env.reset(seed=0)
     total = 0.0
+    steps = 0
     for _ in range(10):
         obs, reward, terminated, truncated, _ = env.step(env.action_space.sample())
         total += reward
+        steps += 1
         if terminated or truncated:
             break
     env.close()
-    print(f"Env    : {env_id} OK（10 ステップ、報酬合計 {total:.2f}）")
+    print(f"Env    : {env_id} OK（{steps} ステップ、報酬合計 {total:.2f}）")
 
 
 if __name__ == "__main__":
