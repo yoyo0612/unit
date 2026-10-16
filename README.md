@@ -31,6 +31,10 @@ Ollama と LM Studio は未導入です。
 
 ### 起動
 
+**ワンクリック**: `scripts\launch-llm.bat` をダブルクリックすると、サーバーを別ウィンドウで起動し、準備ができたらブラウザでチャット画面を開きます。すでに起動している場合はブラウザだけ開きます。停止はサーバーのウィンドウで Ctrl+C。
+
+手動で起動する場合:
+
 ```powershell
 cd C:\unit
 powershell -ExecutionPolicy Bypass -File scripts\start-llm-server.ps1
