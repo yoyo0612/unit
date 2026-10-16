@@ -7,8 +7,22 @@
 - llama.cpp b11675（CUDA 12.4 版）→ `C:\llm\bin\`
 - `hf` CLI（huggingface_hub 2.2.0、`uv tool` で導入）
 - Docker Desktop
+- モデル: `unsloth/Qwen3.6-35B-A3B-GGUF` の `Qwen3.6-35B-A3B-UD-Q4_K_M.gguf`（約 20.6GB、MoE）→ `C:\llm\models\`
+- 起動スクリプト: `scripts\start-llm-server.ps1`（このリポジトリ内）
 
-未導入: Ollama、LM Studio、GGUF モデル
+未導入: Ollama、LM Studio
+
+### すぐ使う
+
+```powershell
+cd C:\unit
+powershell -ExecutionPolicy Bypass -File scripts\start-llm-server.ps1
+```
+
+`llama_server: listening on http://127.0.0.1:8080` と出たら起動完了です（読み込みに数秒〜十数秒）。
+- ブラウザ: `http://127.0.0.1:8080` で llama-server 内蔵のチャット画面が開く
+- API: `http://127.0.0.1:8080/v1`（OpenAI 互換、API キー不要）
+- 停止: 起動したターミナルで Ctrl+C
 
 > 注意: 速度や対応モデルは個人の報告やベンチマークに基づく推定を含みます。
 > モデル名・フラグ・リリース版は導入時に必ず最新の公式情報で確認してください。
@@ -197,6 +211,17 @@ C:\llm\bin\llama-bench.exe -m C:\llm\models\<モデル名>.gguf -ngl 99 --n-cpu-
 - `-ncmoe`、`-t`、`-c`
 - プロンプト処理速度（pp）と生成速度（tg）、単位は tok/s
 - VRAM 使用量
+
+### この PC での実測（2026-10-16）
+
+| モデル | `-ncmoe` | `-t` | `-c` | pp (tok/s) | tg (tok/s) | VRAM |
+|---|---|---|---|---|---|---|
+| Qwen3.6-35B-A3B UD-Q4_K_M | 30 | 16 | 16384 | 約 18（22 トークンの短いプロンプト） | 約 20 | 7.9 / 8.2GB（デスクトップ分 約 0.65GB を含む） |
+
+VRAM がほぼ上限なので、他の GPU を使うアプリ（ゲーム等）と同時に使うと溢れる可能性があります。その場合は
+`-NCpuMoe 34` のように増やしてください。速度を詰める場合は上記の手順で `llama-bench` を使って比較します。
+
+> Qwen3.6 は既定で思考（reasoning）を出力します。API 応答では `reasoning_content` に分かれて返ります。
 
 ---
 
