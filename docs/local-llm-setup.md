@@ -255,10 +255,28 @@ C:\llm\bin\llama-bench.exe -m C:\llm\models\<モデル名>.gguf -ngl 99 --n-cpu-
 長文の確認: 約 10 万トークン（99,736）の文章の中ほどに埋め込んだ合言葉を正しく答えられた。
 プロンプト処理 124 秒（805 tok/s）、生成 22.9 tok/s、VRAM 6.67GB。
 
-速度優先に戻す場合:
+### KV キャッシュの量子化（q8_0）とコンテキスト上限
+
+KV キャッシュを q8_0 にすると VRAM が大きく減り、モデル上限の 262K まで使えます（速度の低下はほぼなし）。
+`scripts\start-llm-server.ps1` の既定は **q8_0 + 128K** です。
+
+| KV | `-c` | tg (tok/s) | VRAM |
+|---|---|---|---|
+| f16 | 131072 | 23.4 | 6.65GB |
+| **q8_0（既定）** | **131072** | **23.0** | **5.43GB** |
+| q8_0 | 262144 | 23.0 | 7.50GB |
+
+長文の確認（q8_0 + 262K）: 約 20 万トークン（200,566）の前半と後半に埋め込んだ合言葉 2 つを両方正しく答えられた。
+プロンプト処理 282 秒（710 tok/s）、生成 18.8 tok/s、VRAM 7.54GB。
+
+構成の切り替え:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\start-llm-server.ps1 -NCpuMoe 33 -Ctx 16384
+# 最大コンテキスト（262K）。VRAM の余裕が約 0.65GB になるため、他の GPU アプリとの併用は難しい
+powershell -ExecutionPolicy Bypass -File scripts\start-llm-server.ps1 -Ctx 262144
+
+# 速度優先（短いコンテキスト）
+powershell -ExecutionPolicy Bypass -File scripts\start-llm-server.ps1 -NCpuMoe 33 -Ctx 16384 -KvType f16
 ```
 
 > Qwen3.6 は既定で思考（reasoning）を出力します。API 応答では `reasoning_content` に分かれて返ります。
