@@ -5,3 +5,6 @@ runs/
 *.gguf
 # 音声アシスタント（家の機器の IP など、ローカル設定を含むため非公開）
 assistant/
+
+# Minecraft サーバー（ワールド・jar・EULA 同意を含むため非公開）
+minecraft-server/
