@@ -8,3 +8,8 @@ assistant/
 
 # Minecraft サーバー（ワールド・jar・EULA 同意を含むため非公開）
 minecraft-server/
+
+# Minecraft ボット（依存パッケージ）
+minecraft-bot/node_modules/
+minecraft-bot/*.log
+minecraft-bot/message*.txt

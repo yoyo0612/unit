@@ -1,0 +1,14 @@
+{
+  "name": "minecraft-llm-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mineflayer bot driven by the local llama-server (OpenAI-compatible API)",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "mineflayer": "^4.39.0"
+  }
+}
