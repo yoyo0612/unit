@@ -153,7 +153,7 @@ C:\llm\bin\llama-server.exe `
   -ngl 99 `
   --n-cpu-moe 30 `
   -c 8192 `
-  -t 16 `
+  -t 12 `
   --flash-attn on `
   --port 8080
 ```
@@ -163,7 +163,7 @@ C:\llm\bin\llama-server.exe `
 | `-ngl 99` | GPU に載せる層数（多めに指定すると余った分は自動で CPU へ） | 基本は大きい値 |
 | `--n-cpu-moe N` | 先頭 N 層の MoE expert を CPU に置く | VRAM が溢れたら増やす、余裕があれば減らす |
 | `-c` | コンテキスト長 | 長いほど VRAM / RAM を使う |
-| `-t` | CPU スレッド数 | 5950X は物理 16 コア。16 から始め、12〜16 の範囲で試す（32 は遅くなりやすい） |
+| `-t` | CPU スレッド数 | 5950X は物理 16 コア。計測の結果 12 が最適（8〜16 は生成速度がほぼ同じ、24 以上は遅くなる）。詳しくは [llm-model-selection-and-tuning.md](llm-model-selection-and-tuning.md) の 3-3 章 |
 | `--flash-attn on` | Flash Attention | 対応モデルでは有効にする |
 | `-ctk q8_0 -ctv q8_0` | KV キャッシュの量子化 | 長いコンテキストで VRAM を節約 |
 
@@ -203,7 +203,7 @@ GUI でモデルを読み込み、「Local Server」から起動します。
 計測は `llama-bench` を使うと便利です。
 
 ```powershell
-C:\llm\bin\llama-bench.exe -m C:\llm\models\<モデル名>.gguf -ngl 99 --n-cpu-moe 30 -t 16
+C:\llm\bin\llama-bench.exe -m C:\llm\models\<モデル名>.gguf -ngl 99 --n-cpu-moe 30 -t 12
 ```
 
 記録する項目の例:
