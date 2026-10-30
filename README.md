@@ -103,6 +103,7 @@ pp / tg の計測条件は約 4,800 トークンのプロンプトと 256 トー
 C:\unit\
 ├── docs\
 │   ├── local-llm-setup.md                    # ローカル LLM の導入手順・計測記録
+│   ├── llm-model-selection-and-tuning.md     # モデル選定と最適化の経緯・判断
 │   └── curiosity-driven-learning-setup.md    # Curiosity-driven Learning の環境構築
 ├── scripts\
 │   ├── start-llm-server.ps1                  # llama-server の起動スクリプト
